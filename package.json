@@ -1,0 +1,40 @@
+{
+  "name": "shuttle-access",
+  "version": "1.0.0",
+  "description": "Shuttle.Access components for use in shuttle-canstrap applications (CanJS / Bootstrap).",
+  "main": "shuttle-access.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shuttle-npm/shuttle-access.git"
+  },
+  "keywords": [
+    "shuttle",
+    "shuttle-access",
+    "identity",
+    "access-control"
+  ],
+  "author": "Eben Roux",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shuttle-npm/shuttle-access/issues"
+  },
+  "homepage": "https://github.com/shuttle-npm/shuttle-access#readme",
+  "dependencies": {
+    "can-define": "^2.0.3",
+    "can-util": "^3.11.5",
+    "jquery": "^3.3.1",
+    "shuttle-can-api": "^1.0.12",
+    "shuttle-canstrap": "^1.0.37",
+    "shuttle-guard": "^1.0.0"
+  },
+  "devDependencies": {
+    "can-fixture": "^2.0.3",
+    "chai": "^4.1.2",
+    "mocha": "^5.0.1",
+    "steal": "^1.7.0",
+    "steal-mocha": "^1.0.0"
+  }
+}
