@@ -26,15 +26,15 @@
     "can-define": "^2.0.3",
     "can-util": "^3.11.5",
     "jquery": "^3.3.1",
-    "shuttle-can-api": "^1.0.12",
+    "shuttle-can-api": "^1.0.13",
     "shuttle-canstrap": "^1.0.37",
     "shuttle-guard": "^1.0.0"
   },
   "devDependencies": {
     "can-fixture": "^2.0.3",
     "chai": "^4.1.2",
-    "mocha": "^5.0.1",
-    "steal": "^1.7.0",
+    "mocha": "^5.0.2",
+    "steal": "^1.8.0",
     "steal-mocha": "^1.0.0"
   }
 }

@@ -3,6 +3,7 @@ import DefineMap from 'can-define/map/';
 import DefineList from 'can-define/list/';
 import Api from 'shuttle-can-api';
 import each from 'can-util/js/each/';
+import guard from 'shuttle-guard';
 
 const Messages = DefineMap.extend({
     missingCredentials: {
@@ -16,6 +17,41 @@ const Messages = DefineMap.extend({
     missingStorage: {
         type: 'string',
         default: 'No storage has been specified.'
+    },
+    missingSessionsApi: {
+        type: 'string',
+        default: 'The \'sessions\' api has not been set.  Make a call to \'access.start()\' before accessing the \'sessions\' api.'
+    },
+    missingAnonymousApi: {
+        type: 'string',
+        default: 'The \'anonymous\' api has not been set.  Make a call to \'access.start()\' before accessing the \'anonymous\' api.'
+    },
+    invalidStorage: {
+        type: 'string',
+        default: 'An invalid \'storage\' instance has been specified.  It should have a \'getItem\', \'setItem\', and \'removeItem\' method.'
+    }
+});
+
+export let messages = new Messages({});
+
+const AccessApi = DefineMap.extend({
+    sessions: {
+        get(value) {
+            if (!value) {
+                throw new Error(messages.missingSessionsApi);
+            }
+
+            return value;
+        }
+    },
+    anonymous: {
+        get(value) {
+            if (!value) {
+                throw new Error(messages.missingAnonymousApi);
+            }
+
+            return value;
+        }
     }
 });
 
@@ -31,15 +67,27 @@ var Access = DefineMap.extend({
             return value + (!value.endsWith('/') ? '/' : '');
         }
     },
-    messages: {
-        Default: Messages
+
+    api: {
+        Default: AccessApi
     },
+
     storage: {
-        default: localStorage
-    },
-    _api: {
         default() {
-            return {};
+            return localStorage
+        },
+        set(newval) {
+            guard.againstUndefined(newval, 'newval');
+
+            if (typeof newval.getItem !== 'function'
+                ||
+                typeof newval.setItem !== 'function'
+                ||
+                typeof newval.removeItem !== 'function') {
+                throw new Error(messages.invalidStorage);
+            }
+
+            return newval;
         }
     },
 
@@ -56,7 +104,7 @@ var Access = DefineMap.extend({
     isUserRequired: 'boolean',
 
     permissions: {
-        default: function(){
+        default: function () {
             return new DefineList();
         }
     },
@@ -90,18 +138,18 @@ var Access = DefineMap.extend({
         var self = this;
 
         if (!this.storage) {
-            throw new Error(this.messages.missingStorage);
+            throw new Error(messages.missingStorage);
         }
 
-        this._api.anonymous = new Api({
+        this.api.anonymous = new Api({
             endpoint: this.url + 'anonymouspermissions'
         });
 
-        this._api.sessions = new Api({
+        this.api.sessions = new Api({
             endpoint: this.url + 'sessions'
         });
 
-        return this._api.anonymous.list()
+        return this.api.anonymous.list()
             .then(function (data) {
                 const username = self.storage.getItem('username');
                 const token = self.storage.getItem('token');
@@ -132,28 +180,28 @@ var Access = DefineMap.extend({
         this.permissions.push({type: type, permission: permission});
     },
 
-    login: function (options) {
+    login: function (credentials) {
         var self = this;
 
         return new Promise((resolve, reject) => {
-            if (!options) {
-                reject(new Error(this.messages.missingCredentials));
+            if (!credentials) {
+                reject(new Error(messages.missingCredentials));
                 return;
             }
 
             var usingToken = !!this.token;
 
-            return this._api.sessions.post({
-                username: this.username,
-                password: this.password,
-                token: this.token
+            return this.api.sessions.post({
+                username: credentials.username,
+                password: credentials.password,
+                token: credentials.token
             })
                 .then(function (response) {
                     if (response.registered) {
-                        self.storage.setItem('username', this.username);
+                        self.storage.setItem('username', credentials.username);
                         self.storage.setItem('token', response.token);
 
-                        self.username = this.username;
+                        self.username = credentials.username;
                         self.token = response.token;
                         self.isUserRequired = false;
 
@@ -173,7 +221,7 @@ var Access = DefineMap.extend({
                             self.storage.removeItem('username');
                             self.storage.removeItem('token');
                         } else {
-                            reject(new Error(this.messages.loginFailure));
+                            reject(new Error(messages.loginFailure));
                         }
                     }
                 })
