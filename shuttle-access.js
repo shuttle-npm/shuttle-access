@@ -34,6 +34,31 @@ const Messages = DefineMap.extend({
 
 export let messages = new Messages({});
 
+export const PermissionMap = DefineMap.extend({
+    type: {
+        type: 'string',
+        default: 'user'
+    },
+    permission: {
+        type: 'string',
+        default: ''
+    }
+});
+
+export const PermissionList = DefineList.extend({
+    '#': PermissionMap
+});
+
+export const AnonymousMap = DefineMap.extend({
+    isUserRequired: {
+        type: 'boolean',
+        default: false
+    },
+    permissions: {
+        Default: PermissionList
+    }
+});
+
 const AccessApi = DefineMap.extend({
     sessions: {
         get(value) {
@@ -104,9 +129,7 @@ var Access = DefineMap.extend({
     isUserRequired: 'boolean',
 
     permissions: {
-        default: function () {
-            return new DefineList();
-        }
+        Default: PermissionList
     },
 
     hasSession: function () {
@@ -142,21 +165,22 @@ var Access = DefineMap.extend({
         }
 
         this.api.anonymous = new Api({
-            endpoint: this.url + 'anonymouspermissions'
+            endpoint: this.url + 'anonymouspermissions',
+            Map: AnonymousMap
         });
 
         this.api.sessions = new Api({
             endpoint: this.url + 'sessions'
         });
 
-        return this.api.anonymous.list()
-            .then(function (data) {
+        return this.api.anonymous.map()
+            .then(function (map) {
                 const username = self.storage.getItem('username');
                 const token = self.storage.getItem('token');
 
-                self.isUserRequired = data.isUserRequired;
+                self.isUserRequired = map.isUserRequired;
 
-                each(data.permissions,
+                each(map.permissions,
                     function (item) {
                         self.addPermission('anonymous', item.permission);
                     });
@@ -168,7 +192,7 @@ var Access = DefineMap.extend({
                         });
                 }
 
-                return data;
+                return map;
             });
     },
 
@@ -184,7 +208,7 @@ var Access = DefineMap.extend({
         var self = this;
 
         return new Promise((resolve, reject) => {
-            if (!credentials) {
+            if (!credentials || !credentials.username || !(!!credentials.password || !!credentials.token)) {
                 reject(new Error(messages.missingCredentials));
                 return;
             }
@@ -208,8 +232,8 @@ var Access = DefineMap.extend({
                         self.removeUserPermissions();
 
                         each(response.permissions,
-                            function (permission) {
-                                self._addPermission('user', permission);
+                            function (item) {
+                                self.addPermission('user', item.permission);
                             });
 
                         resolve();

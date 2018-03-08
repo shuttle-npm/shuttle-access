@@ -4,6 +4,9 @@ import fixture from 'can-fixture';
 import {options} from 'shuttle-access';
 import access from 'shuttle-access';
 import DefineMap from 'can-define/map/';
+import chaiAsPromised from 'chai-as-promised';
+
+chai.use(chaiAsPromised);
 
 var assert = chai.assert;
 
@@ -27,6 +30,8 @@ fixture({
         var response = request.data;
 
         response.registered = true;
+        response.token = 'token';
+        response.permissions = [{permission: 'test://user-permission'}]
 
         return response;
     }
@@ -112,5 +117,40 @@ describe('Access', function () {
 
                 access.storage = localStorage;
             });
+    });
+
+    it('should not be able to log in when no credentials are specified', function(){
+        assert.isRejected(access.login({}));
+    });
+
+    it('should be able to log in and then out again', function(){
+        access.storage = storage;
+
+        return new Promise((resolve, reject) => {
+            access.start()
+                .then(function (response) {
+                    access.login({
+                        username: 'user',
+                        password: 'the-password'
+                    })
+                        .then(function(){
+                            assert.isTrue(access.hasPermission('test://anonymous'));
+                            assert.isTrue(access.hasPermission('test://user-permission'));
+                            assert.equal(access.username, 'user');
+                            assert.equal(access.token, 'token');
+
+                            access.logout();
+
+                            assert.isTrue(access.hasPermission('test://anonymous'));
+                            assert.isFalse(access.hasPermission('test://user-permission'));
+                            assert.isUndefined(access.username);
+                            assert.isUndefined(access.token);
+
+                            access.storage = localStorage;
+
+                            resolve();
+                        })
+                });
+        });
     });
 });
