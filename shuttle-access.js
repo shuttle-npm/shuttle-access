@@ -213,7 +213,7 @@ var Access = DefineMap.extend({
                 return;
             }
 
-            var usingToken = !!this.token;
+            var usingToken = !!credentials.token;
 
             return this.api.sessions.post({
                 username: credentials.username,
