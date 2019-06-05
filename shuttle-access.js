@@ -1,6 +1,5 @@
 import $ from 'jquery';
-import DefineMap from 'can-define/map/';
-import DefineList from 'can-define/list/';
+import {DefineMap, DefineList, Reflect} from 'can';
 import Api from 'shuttle-can-api';
 import each from 'can-util/js/each/';
 import guard from 'shuttle-guard';
@@ -180,7 +179,7 @@ var Access = DefineMap.extend({
 
                 self.isUserRequired = map.isUserRequired;
 
-                each(map.permissions,
+                Reflect.each(map.permissions,
                     function (item) {
                         self.addPermission('anonymous', item.permission);
                     });

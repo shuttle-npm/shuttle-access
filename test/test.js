@@ -3,7 +3,7 @@ import chai from 'chai';
 import fixture from 'can-fixture';
 import {options} from 'shuttle-access';
 import access from 'shuttle-access';
-import DefineMap from 'can-define/map/';
+import {DefineMap} from 'can';
 import chaiAsPromised from 'chai-as-promised';
 
 chai.use(chaiAsPromised);
