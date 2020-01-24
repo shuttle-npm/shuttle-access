@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import {DefineMap, DefineList, Reflect} from 'can';
 import Api from 'shuttle-can-api';
-import each from 'can-util/js/each/';
 import guard from 'shuttle-guard';
 
 const Messages = DefineMap.extend({
@@ -230,7 +229,7 @@ var Access = DefineMap.extend({
 
                         self.removeUserPermissions();
 
-                        each(response.permissions,
+                        Reflect.each(response.permissions,
                             function (item) {
                                 self.addPermission('user', item.permission);
                             });

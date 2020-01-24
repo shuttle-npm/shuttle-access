@@ -1,6 +1,6 @@
 {
   "name": "shuttle-access",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Shuttle.Access components for use in shuttle-canstrap applications (CanJS / Bootstrap).",
   "main": "shuttle-access.js",
   "scripts": {
