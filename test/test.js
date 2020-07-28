@@ -1,10 +1,13 @@
-import 'steal-mocha';
 import chai from 'chai';
-import fixture from 'can-fixture';
-import {options} from 'shuttle-access';
-import access from 'shuttle-access';
-import {DefineMap} from 'can';
+import Access from '../src/shuttle-access.js';
 import chaiAsPromised from 'chai-as-promised';
+var axios = require("axios");
+var MockAdapter = require("axios-mock-adapter");
+import sinon from 'sinon';
+
+debugger;
+
+var mock = new MockAdapter(axios);
 
 chai.use(chaiAsPromised);
 
@@ -14,38 +17,39 @@ var tracking = {
     anonymousCalls: 0
 }
 
-fixture({
-    'GET /access/anonymouspermissions'() {
-        try {
-            return {
+mock.onGet('http://access/permissions/anonymous').reply(function () {
+    try {
+        return [
+            200,
+            {
                 isUserRequired: tracking.anonymousCalls === 0,
-                permissions: [{permission: 'test://anonymous'}]
-            };
-        }
-        finally {
-            tracking.anonymousCalls++;
-        }
-    },
-    'POST /access/sessions'(request) {
-        var response = request.data;
-
-        response.registered = true;
-        response.token = 'token';
-        response.permissions = [{permission: 'test://user-permission'}]
-
-        return response;
+                permissions: [{ permission: 'test://anonymous' }]
+            }
+        ];
+    }
+    finally {
+        tracking.anonymousCalls++;
     }
 });
 
-var Storage = DefineMap.extend({
-    username: {
-        type: 'string',
-        default: undefined
-    },
-    token: {
-        type: 'string',
-        default: undefined
-    },
+mock.onPost('http://access/sessions').reply(function(config){
+    var response = JSON.parse(config.data);
+
+    response.registered = true;
+    response.token = 'token';
+    response.permissions = [{permission: 'test://user-permission'}]
+
+    return [
+        200,
+        response
+    ];
+});
+
+class Storage {
+    constructor(username, token) {
+        this.username = username;
+        this.token = token;
+    }
     getItem(name) {
         switch (name) {
             case 'username': {
@@ -55,76 +59,57 @@ var Storage = DefineMap.extend({
                 return this.token;
             }
         }
-    },
+    }
     setItem() {
-    },
+    }
     removeItem() {
     }
-});
-
-var storage = new Storage();
+};
 
 describe('Access', function () {
-    it('should not be able to start with no options.url set', function () {
-        assert.throws(() => access.start());
+    it('should not be able to construct without a url', function () {
+        assert.throws(() => new Access());
     });
 
-    it('should not be able to use sessions api if not set', function () {
-        assert.throws(() => access.api.sessions.list());
-    })
-
-    it('should not be able to use anonymous api if not set', function () {
-        assert.throws(() => access.api.anonymous.list());
-    })
-
     it('should be able to start and get anonymous permissions with user required', function () {
-        access.url = 'http://access';
+        var access = new Access('http://access', { storage: new Storage() });
 
-        access.storage = storage;
-
-        return access.start()
+        access.start()
             .then(function (response) {
                 assert.isTrue(response.isUserRequired);
                 assert.isTrue(access.hasPermission('test://anonymous'));
-
-                access.storage = localStorage;
             });
     });
 
     it('should be able to start and get anonymous permissions without user required', function () {
-        access.storage = storage;
+        var access = new Access('http://access', { storage: new Storage() });
 
-        return access.start()
+        access.start()
             .then(function (response) {
                 assert.isFalse(response.isUserRequired);
                 assert.isTrue(access.hasPermission('test://anonymous'));
-
-                access.storage = localStorage;
             });
     });
 
     it('should be able to log in after start when username and token are available', function () {
-        access.storage = storage;
+        var access = new Access('http://access', { storage: new Storage('user', 'token') });
 
-        storage.username = 'user';
-        storage.token = 'token';
-
-        return access.start()
+        access.start()
             .then(function (response) {
                 assert.isTrue(access.hasPermission('test://anonymous'));
                 assert.equal(access.username, 'user');
                 assert.equal(access.token, 'token');
-
-                access.storage = localStorage;
             });
     });
 
-    it('should not be able to log in when no credentials are specified', function(){
+    it('should not be able to log in when no credentials are specified', function () {
+        var access = new Access('http://access', { storage: new Storage() });
+
         assert.isRejected(access.login({}));
     });
 
-    it('should be able to log in and then out again', function(){
-        access.storage = storage;
+    it('should be able to log in and then out again', function () {
+        var access = new Access('http://access', { storage: new Storage() });
 
         return new Promise((resolve, reject) => {
             access.start()
@@ -133,7 +118,7 @@ describe('Access', function () {
                         username: 'user',
                         password: 'the-password'
                     })
-                        .then(function(){
+                        .then(function () {
                             assert.isTrue(access.hasPermission('test://anonymous'));
                             assert.isTrue(access.hasPermission('test://user-permission'));
                             assert.equal(access.username, 'user');
@@ -146,7 +131,7 @@ describe('Access', function () {
                             assert.isUndefined(access.username);
                             assert.isUndefined(access.token);
 
-                            access.storage = localStorage;
+                            //access.storage = localStorage;
 
                             resolve();
                         })

@@ -1,11 +1,9 @@
 {
   "name": "shuttle-access",
-  "version": "1.0.3",
-  "description": "Shuttle.Access components for use in shuttle-canstrap applications (CanJS / Bootstrap).",
+  "version": "2.0.0",
+  "description": "Package for use in JavaScript applications to integrate with Shuttle.Access back-end.",
   "main": "shuttle-access.js",
-  "scripts": {
-    "test": "mocha"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shuttle-npm/shuttle-access.git"
@@ -23,18 +21,23 @@
   },
   "homepage": "https://github.com/shuttle-npm/shuttle-access#readme",
   "dependencies": {
-    "can": "^5.27.1",
+    "axios": "^0.19.2",
     "jquery": "^3.4.1",
-    "shuttle-can-api": "^1.0.28",
-    "shuttle-canstrap": "^1.1.0",
-    "shuttle-guard": "^1.0.0"
+    "shuttle-guard": "^1.0.1"
   },
   "devDependencies": {
-    "can-fixture": "^3.1.5",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.7",
+    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/register": "^7.8.6",
+    "axios-mock-adapter": "^1.18.2",
+    "babel-loader": "^8.1.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^6.1.4",
-    "steal": "^2.2.1",
-    "steal-mocha": "^2.0.1"
+    "mocha": "^8.0.1",
+    "sinon": "^9.0.1",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
   }
 }
