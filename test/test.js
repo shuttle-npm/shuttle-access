@@ -1,12 +1,9 @@
 import chai from 'chai';
-import Access from '../src/shuttle-access.js';
+import Access from '../shuttle-access.js';
 import chaiAsPromised from 'chai-as-promised';
+
 var axios = require("axios");
 var MockAdapter = require("axios-mock-adapter");
-import sinon from 'sinon';
-
-debugger;
-
 var mock = new MockAdapter(axios);
 
 chai.use(chaiAsPromised);
@@ -71,30 +68,30 @@ describe('Access', function () {
         assert.throws(() => new Access());
     });
 
-    it('should be able to start and get anonymous permissions with user required', function () {
+    it('should be able to initialize and get anonymous permissions with user required', function () {
         var access = new Access('http://access', { storage: new Storage() });
 
-        access.start()
+        access.initialize()
             .then(function (response) {
                 assert.isTrue(response.isUserRequired);
                 assert.isTrue(access.hasPermission('test://anonymous'));
             });
     });
 
-    it('should be able to start and get anonymous permissions without user required', function () {
+    it('should be able to initialize and get anonymous permissions without user required', function () {
         var access = new Access('http://access', { storage: new Storage() });
 
-        access.start()
+        access.initialize()
             .then(function (response) {
                 assert.isFalse(response.isUserRequired);
                 assert.isTrue(access.hasPermission('test://anonymous'));
             });
     });
 
-    it('should be able to log in after start when username and token are available', function () {
+    it('should be able to log in after initialize when username and token are available', function () {
         var access = new Access('http://access', { storage: new Storage('user', 'token') });
 
-        access.start()
+        access.initialize()
             .then(function (response) {
                 assert.isTrue(access.hasPermission('test://anonymous'));
                 assert.equal(access.username, 'user');
@@ -112,7 +109,7 @@ describe('Access', function () {
         var access = new Access('http://access', { storage: new Storage() });
 
         return new Promise((resolve, reject) => {
-            access.start()
+            access.initialize()
                 .then(function (response) {
                     access.login({
                         username: 'user',
@@ -130,8 +127,6 @@ describe('Access', function () {
                             assert.isFalse(access.hasPermission('test://user-permission'));
                             assert.isUndefined(access.username);
                             assert.isUndefined(access.token);
-
-                            //access.storage = localStorage;
 
                             resolve();
                         })

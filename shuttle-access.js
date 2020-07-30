@@ -74,7 +74,7 @@ export class Access {
         });
     }
 
-    start() {
+    initialize() {
         var self = this;
 
         if (!this._storage) {
@@ -149,11 +149,11 @@ export class Access {
                         self._storage.setItem('username', credentials.username);
                         self._storage.setItem('token', data.token);
 
-                        self.username = credentials.username;
+                        self.username = data.username;
                         self.token = data.token;
                         self.isUserRequired = false;
 
-                        self.removeUserPermissions();
+                        self.removePermissions('user');
 
                         data.permissions.forEach(function (item) {
                             self.addPermission('user', item.permission);
@@ -185,12 +185,12 @@ export class Access {
         this._storage.removeItem('username');
         this._storage.removeItem('token');
 
-        this.removeUserPermissions();
+        this.removePermissions('user');
     }
 
-    removeUserPermissions() {
+    removePermissions(type) {
         this.permissions = this.permissions.filter(function (item) {
-            return item.type !== 'user';
+            return item.type !== type;
         });
     }
 
