@@ -64,12 +64,10 @@ A login expects the following response from the `POST` to the `/sessions` endpoi
 
 ```
 {
-    data: {
-        registered: (boolean), // true when session registered; else false
-        username: (string), // returns the username associated with the session
-        token: (string), // a session token that is specific to the server 
-        permissions: ['access://permission-on', 'another', ...]
-    }
+	registered: (boolean), // true when session registered; else false
+	username: (string), // returns the username associated with the session
+	token: (string), // a session token that is specific to the server 
+	permissions: ['access://permission-on', 'another', ...]
 }
 ```
 
