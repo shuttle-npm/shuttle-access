@@ -37,7 +37,7 @@ var access = new Access('http://access-api-url', {
 Next we need to `initialize` the istance:
 
 ```
-    access.initilize(); // returns promise
+access.initilize(); // returns promise
 ```
 
 This will retrieve all the anonymous permissions from the `/permissions/anonymous` endpoint and add them as type `anonymous`.  The endpoint can also return an `isUserRequired` property on the response.  If `true` then there are no users registered.
@@ -47,7 +47,7 @@ Should the `storage` contain a `token` then a `shuttle-access` will attempt to c
 ## Login
 
 ```
-    access.login(credentials); // returns promise
+access.login(credentials); // returns promise
 ```
 
 Performs an explicit login by using the specified `credentials` which should contain either `username` and `password`, or `token`.  The session-creation will be attempted by sending a `POST` to the `/sessions` endpoint using the following JSON `body`:
@@ -76,7 +76,7 @@ If `registered` is `true` then the `username` and `token` will be set on the `st
 ## Logout
 
 ```
-    access.logout();
+access.logout();
 ```
 
 The `username` and `token` properties on the `access` as well as the `storage` instances.
@@ -95,7 +95,7 @@ Permissions are unique.  The permissions may be accessed using the following met
 ## Login status
 
 ```
-    access.loginStatus();
+var status = access.loginStatus;
 ```
 
 Returns:
