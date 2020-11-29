@@ -43,6 +43,7 @@ export class Access {
         this.token = '';
         this.isUserRequired = false;
         this.permissions = [];
+        this.initialized = false;
     }
 
     url(value) {
@@ -94,10 +95,14 @@ export class Access {
                 guard.againstUndefined(response.data.permissions, 'response.data.permissions');
                 guard.againstUndefined(response.data.isUserRequired, 'response.data.isUserRequired');
 
-                const username = self._storage.getItem('username');
-                const token = self._storage.getItem('token');
+                let username = self._storage.getItem('username');
+                let token = self._storage.getItem('token');
 
-                self.isUserRequired = response.data.isUserRequired;
+                if (response.data.isUserRequired){
+                    self.isUserRequired = true;
+                    username = undefined;
+                    token = undefined;
+                } 
 
                 response.data.permissions.forEach(function (item) {
                     self.addPermission('anonymous', item.permission);
@@ -106,9 +111,13 @@ export class Access {
                 if (!!username && !!token) {
                     return self.login({ username: username, token: token })
                         .then(function (response) {
+                            self.initialized = true;
+
                             return response;
                         });
                 }
+
+                self.initialized = true;
 
                 return response.data;
             });
@@ -195,7 +204,7 @@ export class Access {
     }
 
     get loginStatus() {
-        return this.isUserRequired ? 'user-required' : this.token == undefined ? 'not-logged-in' : 'logged-in';
+        return this.isUserRequired ? 'user-required' : !this.token ? 'not-logged-in' : 'logged-in';
     }
 };
 
