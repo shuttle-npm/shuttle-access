@@ -15,8 +15,8 @@ export class Permission {
 };
 
 export class Anonymous {
-    constructor(isUserRequired, permissions) {
-        this.isUserRequired = isUserRequired;
+    constructor(isIdentityRequired, permissions) {
+        this.isIdentityRequired = isIdentityRequired;
         this.permissions = permissions;
     }
 };
@@ -39,9 +39,9 @@ export class Access {
         }
 
         this._storage = o.storage;
-        this.username = '';
+        this.identityName = '';
         this.token = '';
-        this.isUserRequired = false;
+        this.isIdentityRequired = false;
         this.permissions = [];
         this.initialized = false;
     }
@@ -93,14 +93,14 @@ export class Access {
                 guard.againstUndefined(response, 'response');
                 guard.againstUndefined(response.data, 'response.data');
                 guard.againstUndefined(response.data.permissions, 'response.data.permissions');
-                guard.againstUndefined(response.data.isUserRequired, 'response.data.isUserRequired');
+                guard.againstUndefined(response.data.isIdentityRequired, 'response.data.isIdentityRequired');
 
-                let username = self._storage.getItem('username');
-                let token = self._storage.getItem('token');
+                let identityName = self._storage.getItem('shuttle-access.identityName');
+                let token = self._storage.getItem('shuttle-access.token');
 
-                if (response.data.isUserRequired){
-                    self.isUserRequired = true;
-                    username = undefined;
+                if (response.data.isIdentityRequired){
+                    self.isIdentityRequired = true;
+                    identityName = undefined;
                     token = undefined;
                 } 
 
@@ -108,8 +108,8 @@ export class Access {
                     self.addPermission('anonymous', item.permission);
                 });
 
-                if (!!username && !!token) {
-                    return self.login({ username: username, token: token })
+                if (!!identityName && !!token) {
+                    return self.login({ identityName: identityName, token: token })
                         .then(function (response) {
                             self.initialized = true;
 
@@ -135,7 +135,7 @@ export class Access {
         var self = this;
 
         return new Promise((resolve, reject) => {
-            if (!credentials || !credentials.username || !(!!credentials.password || !!credentials.token)) {
+            if (!credentials || !credentials.identityName || !(!!credentials.password || !!credentials.token)) {
                 reject(new Error(messages.missingCredentials));
                 return;
             }
@@ -143,7 +143,7 @@ export class Access {
             var usingToken = !!credentials.token;
 
             return axios.post(this.url('sessions'), {
-                username: credentials.username,
+                identityName: credentials.identityName,
                 password: credentials.password,
                 token: credentials.token
             })
@@ -155,27 +155,27 @@ export class Access {
                     const data = response.data;
     
                     if (data.registered) {
-                        self._storage.setItem('username', credentials.username);
-                        self._storage.setItem('token', data.token);
+                        self._storage.setItem('shuttle-access.identityName', credentials.identityName);
+                        self._storage.setItem('shuttle-access.token', data.token);
 
-                        self.username = data.username;
+                        self.identityName = data.identityName;
                         self.token = data.token;
-                        self.isUserRequired = false;
+                        self.isIdentityRequired = false;
 
-                        self.removePermissions('user');
+                        self.removePermissions('identity');
 
                         data.permissions.forEach(function (item) {
-                            self.addPermission('user', item.permission);
+                            self.addPermission('identity', item.permission);
                         });
 
-                        resolve();
+                        resolve(response);
                     } else {
                         if (usingToken) {
-                            self.username = undefined;
+                            self.identityName = undefined;
                             self.token = undefined;
 
-                            self._storage.removeItem('username');
-                            self._storage.removeItem('token');
+                            self._storage.removeItem('shuttle-access.identityidentityName');
+                            self._storage.removeItem('shuttle-access.token');
                         } else {
                             reject(new Error(messages.loginFailure));
                         }
@@ -188,13 +188,13 @@ export class Access {
     }
 
     logout() {
-        this.username = undefined;
+        this.identityName = undefined;
         this.token = undefined;
 
-        this._storage.removeItem('username');
-        this._storage.removeItem('token');
+        this._storage.removeItem('shuttle-access.identityName');
+        this._storage.removeItem('shuttle-access.token');
 
-        this.removePermissions('user');
+        this.removePermissions('identity');
     }
 
     removePermissions(type) {
@@ -204,7 +204,7 @@ export class Access {
     }
 
     get loginStatus() {
-        return this.isUserRequired ? 'user-required' : !this.token ? 'not-logged-in' : 'logged-in';
+        return this.isIdentityRequired ? 'identity-required' : !this.token ? 'not-logged-in' : 'logged-in';
     }
 };
 
