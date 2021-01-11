@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/shuttle-npm/shuttle-access#readme",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "jquery": "^3.4.1",
     "shuttle-guard": "^1.0.1"
   },
