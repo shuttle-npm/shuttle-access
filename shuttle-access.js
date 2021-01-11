@@ -150,11 +150,11 @@ export class Access {
                 .then(function (response) {
                     guard.againstUndefined(response, 'response');
                     guard.againstUndefined(response.data, 'response.data');
-                    guard.againstUndefined(response.data.registered, 'response.data.registered');
+                    guard.againstUndefined(response.data.success, 'response.data.success');
 
                     const data = response.data;
     
-                    if (data.registered) {
+                    if (data.success) {
                         self._storage.setItem('shuttle-access.identityName', credentials.identityName);
                         self._storage.setItem('shuttle-access.token', data.token);
 

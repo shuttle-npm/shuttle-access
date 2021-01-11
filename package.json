@@ -1,6 +1,6 @@
 {
   "name": "shuttle-access",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Package for use in JavaScript applications to integrate with Shuttle.Access back-end.",
   "main": "shuttle-access.js",
   "scripts": {},
